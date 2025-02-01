@@ -5,20 +5,25 @@ import os
 
 app = FastAPI()
 
-# Enable CORS (Allow all origins)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow requests from any origin
-    allow_methods=["GET"],  # Only allow GET requests
-    allow_headers=["*"],
+    allow_origins=["*"],  # Allow all domains
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
 )
 
-# Load student marks from a file
-with open("marks.json", "r") as f:
-    student_marks = json.load(f)
+marks_file = "marks.json"
+if os.path.exists(marks_file):
+    with open(marks_file, "r") as f:
+        student_marks = json.load(f)
+else:
+    student_marks = {}
 
 @app.get("/api")
 def get_marks(name: list[str] = []):
     """Fetch marks for given student names"""
+    if not name:
+        return {"error": "No names provided"}
+    
     marks = [student_marks.get(n, None) for n in name]
     return {"marks": marks}
